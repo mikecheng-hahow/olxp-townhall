@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="zh-Hant-TW" class="intro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Content 部門 Engine On</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="gsap.min.js"></script>
+<style>
+/* 風格參考 h4b-adapt 策展站：深青綠底＋放射光、置中大白字、襯線副標、膠囊按鈕。四角色色票同屬青綠→藍色系（Mike 2026-10-06 確認）。 */
+:root{
+  --deep:#021820; --mid:#04303D; --glow:#0A5C66; --night:#02141B;
+  --ink:#fff; --dim:rgba(255,255,255,.66); --faint:rgba(255,255,255,.42); --line:rgba(255,255,255,.12);
+  --mint:#00FFBD; --teal:#00CCB4; --cyan:#22B8CF; --sky:#4D9DE0;
+  --zh:"Noto Sans TC","PingFang TC","Microsoft JhengHei",-apple-system,sans-serif;
+  --serif:"Noto Serif TC","Songti TC",serif;
+  --en:"Space Grotesk","Noto Sans TC",sans-serif;
+}
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{min-height:100vh;color:var(--ink);font-family:var(--zh);-webkit-font-smoothing:antialiased;overflow-x:hidden;
+  background:radial-gradient(ellipse 90% 70% at 50% 38%,var(--glow) 0%,var(--mid) 42%,var(--deep) 100%) fixed var(--deep)}
+html.locked,html.locked body{overflow:hidden}
+
+/* 放射光 */
+.rays{position:fixed;left:50%;top:38%;width:220vmax;height:220vmax;margin:-110vmax 0 0 -110vmax;pointer-events:none;z-index:0;
+  background:repeating-conic-gradient(from 0deg at 50% 50%,rgba(0,255,189,.075) 0deg .35deg,transparent .35deg 5deg);
+  -webkit-mask-image:radial-gradient(circle at 50% 50%,#000 0,rgba(0,0,0,.5) 12%,transparent 30%);
+          mask-image:radial-gradient(circle at 50% 50%,#000 0,rgba(0,0,0,.5) 12%,transparent 30%);
+  animation:spin 160s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ───── 主頁（一屏） ───── */
+.page{position:relative;z-index:1;max-width:1500px;margin:0 auto;min-height:100vh;min-height:100svh;
+  padding:clamp(18px,3.4vh,44px) clamp(16px,3vw,48px) clamp(14px,2.4vh,28px);
+  display:flex;flex-direction:column;align-items:center;gap:clamp(10px,1.9vh,24px);text-align:center}
+.eyebrow{display:flex;align-items:center;gap:16px;font:500 clamp(11px,.95vw,14px)/1 var(--en);letter-spacing:.26em;color:var(--mint);margin-top:clamp(0px,1.5vh,20px)}
+.eyebrow::before,.eyebrow::after{content:"";width:clamp(24px,4vw,56px);height:1px;background:currentColor;opacity:.7}
+.headline{margin:0;font-weight:900;letter-spacing:-.01em;line-height:1.12;font-size:min(5.4vw,8.4vh,96px)}
+.headline span{display:block;white-space:nowrap}
+.sub{margin:0;font:500 clamp(16px,1.6vw,24px)/1.6 var(--serif);color:var(--dim);letter-spacing:.06em}
+
+.grid{width:100%;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(10px,1.1vw,16px);margin-top:clamp(4px,1vh,12px);flex:1;text-align:left}
+.card{position:relative;border-radius:14px;padding:clamp(16px,2.3vh,26px) clamp(14px,1.3vw,22px) clamp(14px,2vh,22px);
+  background:linear-gradient(180deg,rgba(255,255,255,.075),rgba(255,255,255,.03));border:1px solid var(--line);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);display:flex;flex-direction:column;overflow:hidden}
+.card::after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+  background:radial-gradient(120% 60% at 50% 0%,color-mix(in srgb,var(--c) 16%,transparent),transparent 60%)}
+.bar{position:absolute;left:0;right:0;top:0;height:4px;background:var(--c);box-shadow:0 0 18px var(--c)}
+.meta{display:flex;justify-content:space-between;align-items:center;font:500 12.5px/1 var(--en);letter-spacing:.18em;color:var(--faint)}
+.tag{color:var(--c);border:1px solid color-mix(in srgb,var(--c) 45%,transparent);border-radius:99px;padding:5px 9px;letter-spacing:.1em}
+.card h2{margin:clamp(8px,1.3vh,14px) 0 clamp(6px,1vh,10px);font-size:clamp(17px,1.45vw,22px);font-weight:700}
+.stats{display:flex;gap:clamp(12px,1.4vw,22px);align-items:flex-end}
+.stat b{display:block;font:700 min(4.6vw,7.4vh,76px)/.9 var(--en);letter-spacing:-.03em;color:var(--c)}
+.stat small{display:block;margin-top:8px;font-size:clamp(13px,1vw,15px);color:var(--dim)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:clamp(10px,1.6vh,16px)}
+.chips span{font-size:clamp(12.5px,.95vw,14.5px);color:var(--dim);border:1px solid var(--line);border-radius:99px;padding:4px 9px;white-space:nowrap}
+.chips span i{font-style:normal;color:var(--ink);font-family:var(--en);font-weight:700;margin-left:4px}
+.status{display:flex;align-items:center;gap:8px;font-size:clamp(14px,1.15vw,17px);color:var(--ink);margin-top:clamp(10px,1.6vh,16px)}
+.status::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;background:var(--c);animation:pulse 1.95s ease-out infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--c) 70%,transparent)}100%{box-shadow:0 0 0 10px transparent}}
+.line{margin:auto 0 0;padding-top:clamp(10px,1.6vh,18px);font-size:clamp(14px,1.15vw,17px);line-height:1.7;color:var(--ink)}
+.cta{display:inline-flex;align-items:center;gap:14px;text-decoration:none;color:var(--night);background:var(--mint);
+  border-radius:99px;padding:clamp(10px,1.5vh,14px) clamp(12px,1vw,14px) clamp(10px,1.5vh,14px) clamp(20px,1.8vw,28px);
+  box-shadow:0 10px 40px -12px rgba(0,255,189,.6);transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+.cta small{font:700 11px/1 var(--en);letter-spacing:.2em;opacity:.7}
+.cta strong{font-size:clamp(15px,1.3vw,19px);font-weight:900}
+.cta .arw{width:34px;height:34px;border-radius:50%;background:var(--night);color:var(--mint);display:grid;place-items:center;font:700 16px var(--en);transition:transform .3s}
+.cta:hover{transform:translateY(-2px)}.cta:hover .arw{transform:translateX(4px)}
+.cta:focus-visible,.replay:focus-visible,.gate button:focus-visible{outline:3px solid var(--mint);outline-offset:4px}
+.foot{margin:0;font-size:12px;color:var(--faint)}
+.replay{position:fixed;right:14px;top:12px;z-index:5;font:500 12px var(--en);letter-spacing:.12em;cursor:pointer;
+  color:var(--dim);background:rgba(2,20,27,.5);border:1px solid var(--line);border-radius:99px;padding:7px 13px}
+
+@media (max-width:1100px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){
+  .headline{font-size:clamp(30px,9.4vw,46px)}.headline span{white-space:normal}
+  .grid{grid-template-columns:1fr}.stat b{font-size:56px}
+  .replay{top:auto;bottom:14px}
+}
+html.intro .page>*{opacity:0}
+
+/* ───── 片頭 ───── */
+.overlay{position:fixed;inset:0;z-index:10;pointer-events:none;overflow:hidden}
+#cv{position:absolute;inset:0;width:100%;height:100%}
+.hud{position:absolute;inset:0;font:500 12px/1 var(--en);letter-spacing:.18em;color:rgba(255,255,255,.55)}
+.hud .tl{position:absolute;left:clamp(16px,3vw,40px);top:clamp(16px,3vh,32px);font-variant-numeric:tabular-nums;font-size:clamp(13px,1.2vw,18px)}
+.hud .tl b{color:#FF4D4F;margin-right:10px}
+.hud .tr{position:absolute;right:clamp(16px,3vw,40px);top:clamp(16px,3vh,32px)}
+.hud .bl{position:absolute;left:clamp(16px,3vw,40px);bottom:clamp(16px,3vh,32px)}
+#hl{position:fixed;margin:0;transform-origin:50% 50%;text-align:center;color:#fff;will-change:transform}
+.gl{--gx:0px;text-shadow:var(--gx) 0 0 rgba(255,45,85,.85),calc(var(--gx)*-1) 0 0 rgba(0,229,255,.85)}
+#nums{position:absolute;left:0;right:0;top:54%;display:flex;flex-direction:column;align-items:center;gap:clamp(8px,1.6vh,18px);
+  font-size:min(3.6vw,5.6vh);font-weight:900}
+.nl{position:relative;display:flex;align-items:center;gap:.5em;white-space:nowrap}
+.nl .bf{position:relative;color:rgba(255,255,255,.9)}
+.nl .bf::after{content:"";position:absolute;left:-4%;right:-4%;top:52%;height:.08em;background:#FF4D4F;transform:scaleX(var(--cut,0));transform-origin:left}
+.nl .ar{font-family:var(--en);color:var(--mint)}
+.nl .af{color:var(--mint)}
+.streak{position:absolute;left:0;top:0;height:4px;border-radius:2px;opacity:0}
+
+.gate{position:fixed;inset:0;z-index:20;display:grid;place-items:center;text-align:center;padding:16px;background:rgba(2,20,27,.86)}
+.gate .k{font:500 12.5px/1 var(--en);letter-spacing:.3em;color:var(--mint)}
+.gate .go{margin:30px auto 24px;display:block;width:140px;height:140px;border-radius:50%;border:0;cursor:pointer;background:var(--mint);color:var(--night);font:900 20px var(--zh);position:relative}
+.gate .go::after{content:"";position:absolute;inset:-12px;border-radius:50%;border:1px solid rgba(0,255,189,.5);animation:ring 1.3s ease-out infinite}
+.gate .go[disabled]{opacity:.4;cursor:wait}
+@keyframes ring{from{transform:scale(.9);opacity:1}to{transform:scale(1.35);opacity:0}}
+.gate .opts{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.gate .opts button{font:500 13px var(--zh);color:var(--dim);background:transparent;border:1px solid var(--line);border-radius:99px;padding:8px 14px;cursor:pointer}
+.gate .hint{margin-top:16px;font-size:13px;color:var(--faint)}
+</style>
+</head>
+<body>
+<div class="rays" aria-hidden="true"></div>
+
+<main class="page" id="page">
+  <div class="eyebrow">CONTENT 部門 · ENGINE ON · 2026.10.07</div>
+  <h1 class="headline" id="h1"><span>時間軸，解鎖。</span><span>內容引擎，全開。</span></h1>
+  <p class="sub">不只做得更多，也做得更深。</p>
+  <section class="grid" id="grid" aria-label="各角色的 AI 應用"></section>
+  <a class="cta" href="https://mikecheng-hahow.github.io/claude-account-move/" target="_blank" rel="noopener">
+    <small>NEXT · 2 MIN</small><strong>發動引擎：Claude 搬家指南</strong><span class="arw" aria-hidden="true">→</span>
+  </a>
+</main>
+
+<button class="replay" id="replay" hidden>↺ 重播開場</button>
+
+<div class="overlay" id="overlay" aria-hidden="true">
+  <canvas id="cv"></canvas>
+  <div class="hud" id="hud">
+    <div class="tl"><b>●</b><span id="tc">00:00:00:00</span></div>
+    <div class="tr">CONTENT ENGINE</div>
+    <div class="bl" id="hudState">TIMELINE · LOADING</div>
+  </div>
+  <h2 class="headline gl" id="hl"><span>時間軸，解鎖。</span><span>內容引擎，全開。</span></h2>
+  <div id="nums">
+    <div class="nl gl"><span class="bf">4 處資料</span><span class="ar">→</span><span class="af">1 則週報</span></div>
+    <div class="nl gl"><span class="bf">手動拼</span><span class="ar">→</span><span class="af">週一自動到</span></div>
+    <div class="nl gl"><span class="af">20 支 AI 工具，全速</span></div>
+  </div>
+  <div id="streaks"></div>
+</div>
+
+<div class="gate" id="gate">
+  <div>
+    <div class="k">OLXP TOWNHALL · CONTENT</div>
+    <button class="go" id="go" disabled>載入中</button>
+    <div class="opts"><button id="snd" aria-pressed="true">聲音：開</button><button id="skip">略過開場</button></div>
+    <div class="hint">點一下或按空白鍵開始；播放中按 Esc 略過</div>
+  </div>
+</div>
+
+<script>
+/* ───── 資料（文案出自〈Townhall文案需求表_20261006_定稿〉＋ Mike 2026-10-06 補充） ───── */
+const ROLES = [
+  { tag:'Manager', zh:'內容經理', c:'#00FFBD', stats:[['R&D','研發中']], status:'引擎調校中，未來分享。' },
+  { tag:'PD', zh:'PD 內容企劃', c:'#00CCB4',
+    stats:[[12,'項 AI 應用']],
+    cats:[['即時儀表板',4],['自動化週報',5],['資料品質與維運',2],['流程延伸評估',1]],
+    line:'3 個看板＋1 張總表，壓成 1 則週報。週一 9:00 準時到，人只管下判斷。' },
+  { tag:'PM', zh:'PM 影音專案管理', c:'#22B8CF',
+    stats:[[8,'支 AI 工具'],[15,'個 AIOS skill']],
+    cats:[['內容定稿',1],['拍攝籌備',3],['後製剪輯',3],['字幕',1]],
+    line:'拆素材、對字幕交給機器；哪一刀該剪，還是人說了算。' },
+  { tag:'Intern', zh:'內容行銷實習', c:'#4D9DE0', stats:[['約 70%','重複動作交給 AI']], status:'資料庫程式持續迭代中',
+    line:'22 個上架小任務、一批要重複 200 多次；約 70% 交給 AI，人只管判斷和最後 publish。' },
+];
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+$('#grid').innerHTML = ROLES.map((r, i) => `
+  <article class="card" style="--c:${r.c}">
+    <div class="bar"></div>
+    <div class="meta"><span>0${i + 1}</span><span class="tag">${r.tag}</span></div>
+    <h2>${r.zh}</h2>
+    ${r.stats ? `<div class="stats">${r.stats.map(([n, u]) => `<div class="stat"><b>${n}</b><small>${u}</small></div>`).join('')}</div>` : ''}
+    ${r.status ? `<div class="status">${r.status}</div>` : ''}
+    ${r.cats ? `<div class="chips">${r.cats.map(([k, n]) => `<span>${k}<i>${n}</i></span>`).join('')}</div>` : ''}
+    ${r.line ? `<p class="line">${r.line}</p>` : ''}
+  </article>`).join('');
+
+/* ───── 片頭時間表：對齊 intro.mp3（〈Undefeated〉22.01–34.23 秒接 136.88 秒至結尾）的實測拍點 ───── */
+const BEATS = [0.21, 0.86, 1.51, 2.16, 2.79, 3.44, 4.09, 4.74, 5.36, 6.01, 6.64];
+const IGNITE = 7.08, DROP = 7.94, PEAK = 9.22, HIT1 = 12.86, HIT2 = 13.28, DUR = 15;
+const LABELS = ['OLXP 看板', '合約看板', 'ADAPT 看板', '課程總表', '毛片', '逐字稿', '課綱', '腳本', '投影片'];
+const COLORS = ROLES.map(r => r.c);
+const CLIPS = LABELS.map((lab, i) => ({ lab, at: BEATS[i] }))
+  .concat(BEATS.slice(3, 9).map((b, k) => ({ lab: LABELS[(k * 4 + 2) % 9], at: b + .325 })));   // 第 3 拍起每半拍多塞一段，越來越擠
+
+const root = document.documentElement, gate = $('#gate'), overlay = $('#overlay'), cv = $('#cv'), cx = cv.getContext('2d');
+let soundOn = true, player = null, tl = null, clock = null, done = false, W = 0, H = 0;
+const rnd = s => { const x = Math.sin(s * 9301 + 49297) * 233280; return x - Math.floor(x); };
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const lerp = (a, b, p) => a + (b - a) * p;
+const eOut = p => p >= 1 ? 1 : 1 - Math.pow(2, -10 * p), eIn = p => p <= 0 ? 0 : Math.pow(2, 10 * p - 10);
+
+function sizeCanvas() {
+  const d = Math.min(devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight;
+  cv.width = W * d; cv.height = H * d; cx.setTransform(d, 0, 0, d, 0, 0);
+}
+
+function glitchAmt(t) {
+  if (t < 3 || t > 6.4) return 0;
+  const ramp = t < 5.3 ? lerp(.15, 1, (t - 3) / 2.3) : 1 - clamp((t - 5.3) / 1.1);
+  const beat = BEATS.some(b => t - b >= 0 && t - b < .12) ? .35 : 0;
+  return clamp(ramp + beat);
+}
+
+/* 畫一層：時間軸塞車 → 故障 → 被吸成一條光線（tint 有值時只畫 RGB 分離的鬼影） */
+function scene(t, tint, dx) {
+  const laneH = H * .09, gap = H * .018, top = H / 2 - (4 * laneH + 3 * gap) / 2, x0 = W * .05, x1 = W * .95, mid = W / 2;
+  const jam = clamp(t / 3.6), ce = eIn(clamp((t - 5.3) / 1.1)), g = glitchAmt(t), f = Math.floor(t * 24);
+  cx.save(); cx.translate(dx, 0);
+  if (!tint) {   // 軌道、尺規、播放頭
+    cx.globalAlpha = 1 - ce;
+    cx.strokeStyle = 'rgba(255,255,255,.08)'; cx.lineWidth = 1;
+    for (let l = 0; l < 4; l++) cx.strokeRect(x0, top + l * (laneH + gap), x1 - x0, laneH);
+    cx.fillStyle = 'rgba(255,255,255,.3)';
+    for (let k = 0; k <= 40; k++) cx.fillRect(lerp(x0, x1, k / 40), top - 14, 1, k % 5 ? 5 : 10);
+    const ph = lerp(x0, x1, (t * .22 + Math.sin(t * 9) * .012 * jam) % 1);   // 越塞越抖
+    cx.fillStyle = jam > .6 ? '#FF4D4F' : '#00FFBD'; cx.fillRect(ph, top - 20, 2, 4 * laneH + 3 * gap + 26);
+    cx.globalAlpha = 1;
+  }
+  CLIPS.forEach(({ lab, at }, i) => {
+    const p = eOut(clamp((t - at) / .32)); if (p <= 0) return;
+    const lane = [0, 1, 2, 3, 0, 2, 1, 3, 1, 2, 0, 3, 1, 2, 0][i], w = W * (.17 + .1 * rnd(i));
+    const tx = lerp(x0, x1 - w, rnd(i + 20)), sx = mid + (tx + w / 2 - mid) * (1 - .45 * jam) - w / 2;   // 越塞越往中間擠
+    let x = lerp(W + 40, sx, p), y = top + lane * (laneH + gap);
+    if (g > 0) { x += (rnd(f + i * 7) - .5) * g * W * .05; y += (rnd(f + i * 13) - .5) * g * laneH * .6; }
+    y = lerp(y, H / 2 - 1, ce); const h = lerp(laneH, 2, ce);
+    cx.globalAlpha = (tint ? .75 : 1) * (1 - clamp((t - 6.35) / .1));
+    cx.fillStyle = tint || COLORS[i % 4];
+    cx.fillRect(x, y, w, h);
+    if (!tint && h > 12) {
+      cx.fillStyle = '#02141B'; cx.font = `700 ${Math.round(laneH * .34)}px "Noto Sans TC"`; cx.textBaseline = 'middle';
+      cx.fillText(lab, x + 12, y + h / 2);
+      if (g > .2 && rnd(f + i) > .55) {   // 像素拉絲
+        const gr = cx.createLinearGradient(x + w, 0, x + w + g * W * .35, 0);
+        gr.addColorStop(0, COLORS[i % 4]); gr.addColorStop(1, 'rgba(0,0,0,0)');
+        cx.fillStyle = gr; cx.fillRect(x + w, y + h * .3, g * W * .35, h * .4);
+      }
+    }
+  });
+  cx.restore(); cx.globalAlpha = 1;
+}
+function draw(t) {
+  cx.clearRect(0, 0, W, H);
+  if (t < IGNITE) {
+    cx.fillStyle = '#02141B'; cx.fillRect(0, 0, W, H);
+    const g = glitchAmt(t);
+    if (g > 0) {
+      cx.globalCompositeOperation = 'screen';
+      scene(t, '#ff2d55', g * 14); scene(t, '#00e5ff', -g * 14);
+      cx.globalCompositeOperation = 'source-over';
+    }
+    scene(t, null, 0);
+    if (g > .3) {   // 畫面切片錯位
+      const f = Math.floor(t * 24), n = 4 + Math.round(g * 10), k2 = cv.height / H;
+      for (let k = 0; k < n; k++) {
+        const sy = rnd(f * 31 + k) * H, sh = 4 + rnd(f * 17 + k) * H * .05, d = (rnd(f * 7 + k) - .5) * g * W * .08;
+        cx.drawImage(cv, 0, sy * k2, cv.width, sh * k2, d, sy, W, sh);
+      }
+    }
+    if (t > 6.35) {   // 收成一條光線，再縮成一點
+      const p = eIn(clamp((t - 6.4) / .62)), w = lerp(W * .84, 4, p);
+      const gr = cx.createLinearGradient(W / 2 - w / 2, 0, W / 2 + w / 2, 0);
+      gr.addColorStop(0, 'rgba(0,255,189,0)'); gr.addColorStop(.5, '#E9FFF9'); gr.addColorStop(1, 'rgba(0,255,189,0)');
+      cx.fillStyle = gr; cx.shadowColor = '#00FFBD'; cx.shadowBlur = 24;
+      cx.fillRect(W / 2 - w / 2, H / 2 - 1.5, w, 3); cx.shadowBlur = 0;
+    }
+  } else if (t < 14.2) {   // 點火：白光爆開、光芒射出，露出底下的放射光
+    const p = clamp((t - IGNITE) / .7);
+    cx.fillStyle = `rgba(2,20,27,${1 - eOut(clamp((t - IGNITE) / .45))})`; cx.fillRect(0, 0, W, H);
+    [[IGNITE, 1.6, 1], [PEAK, 1.1, .55]].forEach(([t0, len, k]) => {   // 放射光芒
+      const q = (t - t0) / len; if (q < 0 || q > 1) return;
+      const R0 = Math.hypot(W, H) * .7, rot = t * .15;
+      cx.save(); cx.translate(W / 2, H / 2); cx.globalCompositeOperation = 'lighter';
+      for (let n = 0; n < 72; n++) {
+        const a = rot + n / 72 * Math.PI * 2, r1 = R0 * eOut(q) * (.5 + .5 * rnd(n)), r0 = r1 * .15;
+        cx.strokeStyle = `rgba(${n % 3 ? '0,255,189' : '77,157,224'},${(1 - q) * .55 * k * rnd(n + 9)})`;
+        cx.lineWidth = 1 + 3 * rnd(n + 3) * (1 - q);
+        cx.beginPath(); cx.moveTo(Math.cos(a) * r0, Math.sin(a) * r0); cx.lineTo(Math.cos(a) * r1, Math.sin(a) * r1); cx.stroke();
+      }
+      cx.restore();
+    });
+    cx.fillStyle = `rgba(233,255,249,${(1 - p) * .95})`; cx.fillRect(0, 0, W, H);
+    [[IGNITE, '#00FFBD'], [DROP, '#22B8CF'], [PEAK, '#00FFBD'], [12, '#00CCB4'], [HIT1, '#4D9DE0'], [HIT2, '#00FFBD']].forEach(([t0, c]) => {
+      const q = (t - t0) / .9; if (q < 0 || q > 1) return;
+      cx.strokeStyle = c; cx.globalAlpha = 1 - q; cx.lineWidth = 3 * (1 - q) + .5;
+      cx.beginPath(); cx.arc(W / 2, H / 2, eOut(q) * Math.hypot(W, H) * .6, 0, 7); cx.stroke(); cx.globalAlpha = 1;
+    });
+  }
+}
+
+function build() {
+  sizeCanvas();
+  $('#streaks').innerHTML = '';
+  const t = gsap.timeline({ paused: true });
+  const hl = $('#hl'), lines = hl.children, R = $('#h1').getBoundingClientRect();
+  Object.assign(hl.style, { left: R.left + 'px', top: R.top + 'px', width: R.width + 'px' });
+  const toCenter = (yFrac, s) => ({ x: W / 2 - (R.left + R.width / 2), y: H * yFrac - (R.top + R.height / 2), scale: s });
+  const big = Math.min(W * .94 / R.width, 2.4);
+  gsap.set(hl, toCenter(.5, big));
+
+  // HUD
+  t.call(() => { $('#hudState').textContent = 'TIMELINE · LOADING'; }, null, 0)
+   .call(() => { $('#hudState').textContent = 'TIMELINE · OVERLOAD'; }, null, 2.6)
+   .call(() => { $('#hudState').textContent = 'SIGNAL · LOST'; }, null, 4.5)
+   .fromTo('#hud', { opacity: 1 }, { opacity: 0, duration: .2 }, IGNITE - .1);
+
+  // 點火：第一句砸下；高潮進來：第二句砸下
+  [[IGNITE, 0], [DROP, 1]].forEach(([at, i]) => {
+    t.fromTo(lines[i], { opacity: 0, scale: 1.35, filter: 'blur(14px)' }, { opacity: 1, scale: 1, filter: 'blur(0px)', duration: .45, ease: 'expo.out' }, at);
+  });
+  // 主標退到上方，讓位給數字
+  t.to(hl, { ...toCenter(.28, big * .6), duration: .7, ease: 'expo.inOut' }, PEAK - .55);
+
+  // 數字三句：之前被一刀劃掉、箭頭甩出、之後砸入
+  const nl = $$('#nums .nl');
+  [[PEAK, 0], [10.73, 1]].forEach(([at, i]) => {
+    const [bf, ar, af] = nl[i].children;
+    t.fromTo(nl[i], { opacity: 0 }, { opacity: 1, duration: .01 }, at)
+     .fromTo(bf, { x: -40, opacity: 0 }, { x: 0, opacity: 1, duration: .25, ease: 'expo.out' }, at)
+     .fromTo(bf, { '--cut': 0 }, { '--cut': 1, duration: .14, ease: 'none' }, at + .3)
+     .to(bf, { opacity: .38, duration: .2 }, at + .42)
+     .fromTo(ar, { x: -30, opacity: 0, scale: .6 }, { x: 0, opacity: 1, scale: 1, duration: .3, ease: 'back.out(3)' }, at + .45)
+     .fromTo(af, { opacity: 0, scale: 1.3, filter: 'blur(8px)' }, { opacity: 1, scale: 1, filter: 'blur(0px)', duration: .35, ease: 'expo.out' }, at + .62);
+  });
+  t.fromTo(nl[2], { opacity: 0 }, { opacity: 1, duration: .01 }, 12)
+   .fromTo(nl[2].children[0], { opacity: 0, scale: 1.4, filter: 'blur(10px)' }, { opacity: 1, scale: 1, filter: 'blur(0px)', duration: .4, ease: 'expo.out' }, 12);
+
+  // 第一下重擊：數字退場，主標飛回網頁大標的位置
+  t.to('#nums', { opacity: 0, y: 30, duration: .3, ease: 'power2.in' }, HIT1 - .12)
+   .to(hl, { x: 0, y: 0, scale: 1, duration: .62, ease: 'expo.inOut' }, HIT1 - .1)
+   .fromTo('.eyebrow', { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: .5, ease: 'expo.out' }, HIT1 + .3)
+   .fromTo('.sub', { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: .5, ease: 'expo.out' }, HIT1 + .38)
+   .fromTo('#h1', { opacity: 0 }, { opacity: 1, duration: .01 }, HIT1 + .55)
+   .fromTo(hl, { opacity: 1 }, { opacity: 0, duration: .01 }, HIT1 + .56);
+
+  // 第二下重擊：四道光帶落成卡片頂端的色條
+  const box = $('#streaks');
+  $$('.card').forEach((c, i) => {
+    const r = c.getBoundingClientRect(), s = document.createElement('div');
+    s.className = 'streak'; s.style.background = COLORS[i]; s.style.boxShadow = `0 0 24px ${COLORS[i]}`; box.appendChild(s);
+    t.fromTo(s, { opacity: 0, x: W / 2, y: H * .5, width: 0 }, { opacity: 1, x: W * .1 + i * W * .2, width: W * .2, duration: .3, ease: 'expo.out' }, HIT1 + .1)
+     .to(s, { x: r.left, y: r.top, width: r.width, duration: .5, ease: 'expo.inOut' }, HIT2 - .22)
+     .to(s, { opacity: 0, duration: .01 }, HIT2 + .3);
+  });
+  t.fromTo('.grid', { opacity: 0 }, { opacity: 1, duration: .01 }, HIT2 + .28)
+   .fromTo('.card', { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: .7, ease: 'expo.out', stagger: .07 }, HIT2 + .28)
+   .fromTo('.cta', { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: .6, ease: 'expo.out', stagger: .1 }, HIT2 + .7)
+   .set({}, {}, DUR);
+  return t;
+}
+
+/* ───── 播放 ───── */
+async function loadAudio() {
+  try {   // 優先用 Web Audio，時鐘最準
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const buf = await ctx.decodeAudioData(await (await fetch('intro.mp3')).arrayBuffer());
+    return { kind: 'wa', ctx, buf };
+  } catch (e) {   // 直接雙擊開檔（file://）時 fetch 會失敗，改用 <audio>
+    const a = new Audio('intro.mp3'); a.preload = 'auto';
+    await new Promise(r => { a.addEventListener('canplaythrough', r, { once: true }); a.addEventListener('error', r, { once: true }); setTimeout(r, 4000); });
+    return { kind: 'el', a };
+  }
+}
+function start() {
+  if (done || tl) return;
+  gate.remove(); root.classList.add('locked'); scrollTo(0, 0);
+  tl = build();
+  const p0 = performance.now() + 120, perf = () => (performance.now() - p0) / 1000;
+  clock = perf;
+  if (player && player.kind === 'wa') {
+    const { ctx, buf } = player; ctx.resume();
+    const g = ctx.createGain(); g.gain.value = soundOn ? 1 : 0; g.connect(ctx.destination);
+    const src = ctx.createBufferSource(); src.buffer = buf; src.connect(g);
+    const t0 = ctx.currentTime + .12; src.start(t0);
+    player.gain = g;
+    clock = () => ctx.state === 'running' ? ctx.currentTime - t0 : perf();   // 音訊卡住就退回系統時鐘
+  } else if (player && player.kind === 'el') {
+    const a = player.a; a.muted = !soundOn; a.currentTime = 0;
+    a.play().then(() => { clock = () => a.paused ? perf() : a.currentTime; }).catch(() => {});
+  }
+  gsap.ticker.add(tick);
+}
+function tick() {
+  const t = clock(); if (t < 0) return;
+  tl.time(Math.min(t, DUR)); draw(t);
+  const g = glitchAmt(t), hit = [IGNITE, DROP, PEAK, 12].some(b => t - b >= 0 && t - b < .18) ? 8 : 0;
+  const gx = (g * 10 + hit) * (rnd(Math.floor(t * 30)) > .5 ? 1 : -1) + 'px';
+  $$('.gl').forEach(el => el.style.setProperty('--gx', gx));
+  const f = Math.floor(t * 30), tc = $('#tc');
+  tc.textContent = `00:00:${String(Math.floor(f / 30)).padStart(2, '0')}:${String(f % 30).padStart(2, '0')}`;
+  tc.style.color = t > 2 ? '#FF4D4F' : '';
+  if (t >= DUR) finish();
+}
+function finish() {
+  if (done) return;
+  done = true; gsap.ticker.remove(tick);
+  if (tl) tl.progress(1);
+  if (player && clock && clock() < DUR) {   // 中途略過才收掉音樂；正常播完讓殘響自然收尾
+    if (player.kind === 'wa' && player.gain) player.gain.gain.setTargetAtTime(0, player.ctx.currentTime, .08);
+    if (player.kind === 'el') player.a.pause();
+  }
+  overlay.remove(); gate.remove();
+  root.classList.remove('intro', 'locked');
+  $$('.page>*').forEach(el => el.style.opacity = 1);
+  $('#replay').hidden = false;
+}
+
+const q = new URLSearchParams(location.search), freeze = q.get('t');   // 檢查用：?t=9.5 定格、?skip 略過
+if (freeze !== null && window.gsap) document.fonts.ready.then(() => { gate.remove(); root.classList.add('locked'); tl = build(); tl.time(+freeze); draw(+freeze); });
+else if (q.has('skip') || matchMedia('(prefers-reduced-motion: reduce)').matches || !window.gsap) finish();
+else {
+  Promise.all([document.fonts.ready, loadAudio().then(p => player = p)]).then(() => { $('#go').disabled = false; $('#go').textContent = '開始'; $('#go').focus(); });
+  $('#go').addEventListener('click', start);
+  $('#skip').addEventListener('click', finish);
+  $('#snd').addEventListener('click', e => { soundOn = !soundOn; e.target.textContent = '聲音：' + (soundOn ? '開' : '關'); e.target.setAttribute('aria-pressed', soundOn); });
+  addEventListener('keydown', e => {
+    if (e.key === 'Escape') finish();
+    else if (e.key === ' ' && !tl && $('#go') && !$('#go').disabled && !['snd', 'skip'].includes(document.activeElement?.id)) { e.preventDefault(); start(); }
+  });
+}
+$('#replay').addEventListener('click', () => { location.href = location.pathname; });
+let rz;   // 播放中切全螢幕或改視窗：重新量位置、接回同一秒
+addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => {
+  if (!tl || done) return;
+  const at = tl.time(); tl.kill(); gsap.set('#hl', { clearProps: 'transform' }); tl = build(); tl.time(at);
+}, 120); });
+</script>
+</body>
+</html>
