@@ -54,7 +54,9 @@ html.locked,html.locked body{overflow:hidden}
 .meta{display:flex;justify-content:space-between;align-items:center;font:500 12.5px/1 var(--en);letter-spacing:.18em;color:var(--faint)}
 .tag{color:var(--c);border:1px solid color-mix(in srgb,var(--c) 45%,transparent);border-radius:99px;padding:5px 9px;letter-spacing:.1em}
 .card h2{margin:clamp(8px,1.3vh,14px) 0 clamp(6px,1vh,10px);font-size:clamp(17px,1.45vw,22px);font-weight:700}
-.stats{display:flex;gap:clamp(12px,1.4vw,22px);align-items:flex-end}
+.stats{display:flex;gap:clamp(10px,1.2vw,22px);align-items:stretch}
+.os{margin:-2px 0 clamp(6px,1vh,10px);font:700 clamp(11px,.9vw,13px)/1 var(--en);letter-spacing:.2em;text-transform:uppercase;color:var(--c)}
+.stat+.stat{padding-left:clamp(10px,1.2vw,22px);border-left:1px solid var(--line)}
 .stat b{display:block;font:700 min(4.6vw,7.4vh,76px)/.9 var(--en);letter-spacing:-.03em;color:var(--c)}
 .stat small{display:block;margin-top:8px;font-size:clamp(13px,1vw,15px);color:var(--dim)}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:clamp(10px,1.6vh,16px)}
@@ -157,13 +159,13 @@ html.intro .page>*{opacity:0}
 <script>
 /* ───── 資料（文案出自〈Townhall文案需求表_20261006_定稿〉＋ Mike 2026-10-06 補充） ───── */
 const ROLES = [
-  { tag:'Manager', zh:'內容經理', c:'#00FFBD', stats:[['R&D','研發中']], status:'引擎調校中，未來分享。' },
+  { tag:'Manager', zh:'內容經理', c:'#00FFBD', stats:[['R&D','研發中']], status:'自動化引擎調校中，未來分享。' },
   { tag:'PD', zh:'PD 內容企劃', c:'#00CCB4',
     stats:[[12,'項 AI 應用']],
     cats:[['即時儀表板',4],['自動化週報',5],['資料品質與維運',2],['流程延伸評估',1]],
     line:'3 個看板＋1 張總表，壓成 1 則週報。週一 9:00 準時到，人只管下判斷。' },
-  { tag:'PM', zh:'PM 影音專案管理', c:'#22B8CF',
-    stats:[[8,'支 AI 工具'],[15,'個 AIOS skill']],
+  { tag:'PM', zh:'PM 影音專案管理', c:'#22B8CF', os:'AI Agent OS',
+    stats:[[3,'Agents'],[15,'skills'],[8,'支 AI 工具']],
     cats:[['內容定稿',1],['拍攝籌備',3],['後製剪輯',3],['字幕',1]],
     line:'拆素材、對字幕交給機器；哪一刀該剪，還是人說了算。' },
   { tag:'Intern', zh:'內容行銷實習', c:'#4D9DE0', stats:[['約 70%','重複動作交給 AI']], status:'資料庫程式持續迭代中',
@@ -175,6 +177,7 @@ $('#grid').innerHTML = ROLES.map((r, i) => `
     <div class="bar"></div>
     <div class="meta"><span>0${i + 1}</span><span class="tag">${r.tag}</span></div>
     <h2>${r.zh}</h2>
+    ${r.os ? `<div class="os">${r.os}</div>` : ''}
     ${r.stats ? `<div class="stats">${r.stats.map(([n, u]) => `<div class="stat"><b>${n}</b><small>${u}</small></div>`).join('')}</div>` : ''}
     ${r.status ? `<div class="status">${r.status}</div>` : ''}
     ${r.cats ? `<div class="chips">${r.cats.map(([k, n]) => `<span>${k}<i>${n}</i></span>`).join('')}</div>` : ''}
