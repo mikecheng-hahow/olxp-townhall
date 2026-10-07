@@ -20,6 +20,7 @@
   --en:"Space Grotesk","Noto Sans TC",sans-serif;
 }
 [hidden]{display:none!important}
+#dust{position:fixed;inset:0;width:100%;height:100%;z-index:30;pointer-events:none}
 *{box-sizing:border-box}
 html,body{margin:0}
 body{min-height:100vh;color:var(--ink);font-family:var(--zh);-webkit-font-smoothing:antialiased;overflow-x:hidden;
@@ -89,27 +90,32 @@ html.intro .page>*{opacity:0}
 /* ───── 片頭 ───── */
 .overlay{position:fixed;inset:0;z-index:10;pointer-events:none;overflow:hidden}
 #cv{position:absolute;inset:0;width:100%;height:100%}
-.hud{position:absolute;inset:0;font:500 12px/1 var(--en);letter-spacing:.18em;color:rgba(255,255,255,.55)}
+.hud{text-shadow:0 0 10px rgba(255,255,255,.35);position:absolute;inset:0;font:500 12px/1 var(--en);letter-spacing:.18em;color:rgba(255,255,255,.55)}
 .hud .tl{position:absolute;left:clamp(16px,3vw,40px);top:clamp(16px,3vh,32px);font-variant-numeric:tabular-nums;font-size:clamp(13px,1.2vw,18px)}
 .hud .tl b{color:#FF4D4F;margin-right:10px}
 .hud .tr{position:absolute;right:clamp(16px,3vw,40px);top:clamp(16px,3vh,32px)}
 .hud .bl{position:absolute;left:clamp(16px,3vw,40px);bottom:clamp(16px,3vh,32px)}
 #hl{position:fixed;margin:0;transform-origin:50% 50%;text-align:center;color:#fff;will-change:transform}
-.gl{--gx:0px;text-shadow:var(--gx) 0 0 rgba(255,45,85,.85),calc(var(--gx)*-1) 0 0 rgba(0,229,255,.85)}
+.gl{--gx:0px;text-shadow:var(--gx) 0 0 rgba(255,45,85,.85),calc(var(--gx)*-1) 0 0 rgba(0,229,255,.85),0 0 24px rgba(0,255,189,calc(.35*var(--ga,1))),0 0 64px rgba(0,255,189,calc(.15*var(--ga,1)))}
 #nums{position:absolute;left:0;right:0;top:54%;display:flex;flex-direction:column;align-items:center;gap:clamp(8px,1.6vh,18px);
   font-size:min(3.6vw,5.6vh);font-weight:900}
 .nl{position:relative;display:flex;align-items:center;gap:.5em;white-space:nowrap}
 .nl .bf{position:relative;color:rgba(255,255,255,.9)}
 .nl .bf::after{content:"";position:absolute;left:-4%;right:-4%;top:52%;height:.08em;background:#FF4D4F;transform:scaleX(var(--cut,0));transform-origin:left}
 .nl .ar{font-family:var(--en);color:var(--mint)}
-.nl .af{color:var(--mint)}
+.nl .af{color:var(--mint);text-shadow:0 0 18px rgba(0,255,189,.6)}
 .streak{position:absolute;left:0;top:0;height:4px;border-radius:2px;opacity:0}
 
-.gate{position:fixed;inset:0;z-index:20;display:grid;place-items:center;text-align:center;padding:16px;background:#02141B;overflow:hidden}
+.gate{position:fixed;inset:0;z-index:20;display:grid;place-items:center;text-align:center;padding:16px;background:#010A0E;overflow:hidden}
 #rain{position:absolute;inset:0;width:100%;height:100%}
+html.noglow .glowc{display:none}
+.glowc{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;filter:blur(12px) brightness(1.4);mix-blend-mode:screen;opacity:.6}
 .gate-in{position:relative;z-index:1}
-.gate .k{font:500 12.5px/1 var(--en);letter-spacing:.3em;color:var(--mint)}
-.gate .go{margin:30px auto 24px;display:block;width:140px;height:140px;border-radius:50%;border:0;cursor:pointer;background:var(--mint);color:var(--night);font:900 20px var(--zh);position:relative}
+.gate .k{font:500 25px/1 var(--en);letter-spacing:.3em;color:var(--mint);white-space:nowrap;text-shadow:0 0 18px rgba(0,255,189,.45)}
+@media (max-width:640px){.gate .k{font-size:15px}}
+.gate .go{margin:30px auto 24px;display:block;width:140px;height:140px;border-radius:50%;border:0;cursor:pointer;background:var(--mint);color:var(--night);font:900 20px var(--zh);position:relative;animation:breathe 2.6s ease-in-out infinite}
+@keyframes breathe{0%,100%{transform:scale(1);box-shadow:0 0 24px 4px rgba(0,255,189,.35),0 0 70px 10px rgba(0,255,189,.12)}50%{transform:scale(1.045);box-shadow:0 0 38px 10px rgba(0,255,189,.6),0 0 120px 30px rgba(0,255,189,.22)}}
+.gate .go[disabled]{animation:none}
 .gate .go::after{content:"";position:absolute;inset:-12px;border-radius:50%;border:1px solid rgba(0,255,189,.5);animation:ring 1.3s ease-out infinite}
 .gate .go[disabled]{opacity:.4;cursor:wait}
 @keyframes ring{from{transform:scale(.9);opacity:1}to{transform:scale(1.35);opacity:0}}
@@ -131,10 +137,12 @@ html.intro .page>*{opacity:0}
   </a>
 </main>
 
+<canvas id="dust" aria-hidden="true"></canvas>
 <button class="replay" id="replay" hidden>↺ 重播開場</button>
 
 <div class="overlay" id="overlay" aria-hidden="true">
   <canvas id="cv"></canvas>
+  <canvas id="cvGlow" class="glowc"></canvas>
   <div class="hud" id="hud">
     <div class="tl"><b>●</b><span id="tc">00:00:00:00</span></div>
     <div class="tr">CONTENT ENGINE</div>
@@ -151,6 +159,7 @@ html.intro .page>*{opacity:0}
 
 <div class="gate" id="gate">
   <canvas id="rain" aria-hidden="true"></canvas>
+  <canvas id="rainGlow" class="glowc" aria-hidden="true"></canvas>
   <div class="gate-in">
     <div class="k">OLXP TOWNHALL · CONTENT</div>
     <button class="go" id="go" disabled>載入中</button>
@@ -269,8 +278,19 @@ function draw(t) {
         cx.drawImage(cv, 0, sy * k2, cv.width, sh * k2, d, sy, W, sh);
       }
     }
-    if (t > 6.35) {   // 收成一條光線，再縮成一點
-      const p = eIn(clamp((t - 6.4) / .62)), w = lerp(W * .84, 4, p);
+    if (t > 6.2) {   // 收成一條光線，再縮成一點；光線成形時大片泛光，跟著線一起縮小
+      const p = eIn(clamp((t - 6.4) / .62)), w = lerp(W * .84, 4, p), I = clamp((t - 6.2) / .2), sc = w / (W * .84);
+      cx.save(); cx.globalCompositeOperation = 'lighter';
+      cx.translate(W / 2, H / 2); cx.scale(1, .3);
+      const R = Math.max(30, W * .6 * sc + 40), bg = cx.createRadialGradient(0, 0, 0, 0, 0, R);
+      bg.addColorStop(0, `rgba(233,255,249,${.55 * I})`); bg.addColorStop(.22, `rgba(0,255,189,${.28 * I})`);
+      bg.addColorStop(.6, `rgba(34,184,207,${.08 * I})`); bg.addColorStop(1, 'rgba(0,0,0,0)');
+      cx.fillStyle = bg; cx.fillRect(-R, -R, R * 2, R * 2);
+      cx.restore(); cx.save(); cx.globalCompositeOperation = 'lighter';
+      const fw = W * 1.25 * sc + 60, fl = cx.createLinearGradient(W / 2 - fw / 2, 0, W / 2 + fw / 2, 0);   // 橫向光斑
+      fl.addColorStop(0, 'rgba(77,157,224,0)'); fl.addColorStop(.5, `rgba(200,255,245,${.7 * I})`); fl.addColorStop(1, 'rgba(77,157,224,0)');
+      cx.fillStyle = fl; cx.fillRect(W / 2 - fw / 2, H / 2 - 6 - 6 * sc, fw, 12 + 12 * sc);
+      cx.restore();
       const gr = cx.createLinearGradient(W / 2 - w / 2, 0, W / 2 + w / 2, 0);
       gr.addColorStop(0, 'rgba(0,255,189,0)'); gr.addColorStop(.5, '#E9FFF9'); gr.addColorStop(1, 'rgba(0,255,189,0)');
       cx.fillStyle = gr; cx.shadowColor = '#00FFBD'; cx.shadowBlur = 24;
@@ -298,6 +318,17 @@ function draw(t) {
       cx.beginPath(); cx.arc(W / 2, H / 2, eOut(q) * Math.hypot(W, H) * .6, 0, 7); cx.stroke(); cx.globalAlpha = 1;
     });
   }
+  if (t >= 6.2) glowCopy(cv, $('#cvGlow'));   // 剪輯片段階段不疊光暈，從收成光線開始才發光
+  else { const g = $('#cvGlow'); g.getContext('2d').clearRect(0, 0, g.width, g.height); }
+}
+const GLOW_OK = (() => { const g = document.createElement('canvas').getContext('2d'); g.filter = 'contrast(3)'; return g.filter === 'contrast(3)'; })();
+if (!GLOW_OK) document.documentElement.classList.add('noglow');   // 瀏覽器不支援 canvas 濾鏡（例如部分 Safari）就不疊光暈，避免整片發灰
+let glowTick = 0;
+function glowCopy(src, dst) {   // 低解析度複製＋CSS 模糊＝整片自然光暈；隔格更新，模糊後看不出差別
+  if (!dst || !GLOW_OK || (glowTick++ & 1)) return;
+  const w = Math.max(1, innerWidth / 4 | 0), h = Math.max(1, innerHeight / 4 | 0);
+  if (dst.width !== w || dst.height !== h) { dst.width = w; dst.height = h; }
+  const g = dst.getContext('2d'); g.clearRect(0, 0, w, h); g.filter = 'contrast(3)'; g.drawImage(src, 0, 0, w, h); g.filter = 'none';   // 拉高對比：暗底歸零，只有亮的地方發光
 }
 
 function build() {
@@ -340,6 +371,7 @@ function build() {
   // 第一下重擊：數字退場，主標飛回網頁大標的位置
   t.to('#nums', { opacity: 0, y: 30, duration: .3, ease: 'power2.in' }, HIT1 - .12)
    .to(hl, { x: 0, y: 0, scale: 1, duration: .62, ease: 'expo.inOut' }, HIT1 - .1)
+   .fromTo(hl, { '--ga': 1 }, { '--ga': 0, duration: .5, ease: 'power2.in' }, HIT1 - .05)
    .fromTo('.eyebrow', { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: .5, ease: 'expo.out' }, HIT1 + .3)
    .fromTo('.sub', { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: .5, ease: 'expo.out' }, HIT1 + .38)
    .fromTo('#h1', { opacity: 0 }, { opacity: 1, duration: .01 }, HIT1 + .55)
@@ -386,13 +418,21 @@ const rain = (() => {
     ...LABELS, '4 處資料 → 1 則週報', '手動拼 → 週一自動到', '20 支 AI 工具，全速', 'Claude 搬家指南'
   ].filter(Boolean))].map(v => [...v.replace(/\s+/g, ' ')]);
   // 四層景深：字級、速度、亮度、出現比重
-  const LAY = [{ s: 12, v: 45, a: .3, w: 6 }, { s: 18, v: 75, a: .45, w: 4 }, { s: 28, v: 125, a: .7, w: 2 }, { s: 48, v: 210, a: .95, w: .8 }];
+  const LAY = [{ s: 12, v: 45, a: .16, w: 6 }, { s: 18, v: 75, a: .26, w: 4 }, { s: 28, v: 125, a: .42, w: 2 }, { s: 48, v: 210, a: .62, w: .8 }];
   const DIRS = [[0, 1, .6], [0, -1, .14], [-1, 0, .13], [1, 0, .13]];   // 往下六成，其他點綴
   const COL = ROLES.map(r => r.c);
   let W, H, k, S = [], run = true, last = 0, col = null, id = 0;
   const pick = arr => { let r = Math.random() * arr.reduce((a, o) => a + (o.w ?? o[2]), 0); return arr.find(o => (r -= (o.w ?? o[2])) < 0) || arr[0]; };
+  const mix = () => {   // 把 2–3 段片語各取一截，亂數拼成新的一串
+    let out = [];
+    for (let k = 1 + (Math.random() * 3 | 0); k > 0; k--) {
+      const p = PHR[Math.random() * PHR.length | 0], a = Math.random() * p.length | 0;
+      out = out.concat(p.slice(a, a + 2 + (Math.random() * 6 | 0)));
+    }
+    return out.length > 1 ? out : PHR[0];
+  };
   function spawn(pre) {
-    const L = pick(LAY), D = pick(DIRS), txt = PHR[Math.random() * PHR.length | 0], cell = L.s * k * 1.15, len = txt.length * cell;
+    const L = pick(LAY), D = pick(DIRS), txt = Math.random() < .5 ? PHR[Math.random() * PHR.length | 0] : mix(), cell = L.s * k * 1.15, len = txt.length * cell;
     const vert = D[0] === 0, span = vert ? H : W;
     const head = pre ? Math.random() * (span + len) : (D[0] + D[1] > 0 ? -cell : span + cell);   // 從畫框外進來
     return { id: id++, L, D, txt, cell, len, vert, head, cross: Math.random() * (vert ? W : H), c: COL[Math.random() * 4 | 0],
@@ -401,7 +441,7 @@ const rain = (() => {
   function size() {
     const d = Math.min(devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight; k = Math.max(.6, Math.min(1.4, H / 900));
     c.width = W * d; c.height = H * d; x.setTransform(d, 0, 0, d, 0, 0);
-    const n = Math.round(Math.min(190, Math.max(60, W * H / 8000)));
+    const n = Math.round(Math.min(380, Math.max(120, W * H / 4000)));
     S = Array.from({ length: n }, () => spawn(true));
   }
   // 解碼波掃過的字顯示中文，之後加密波掃過再變回亂碼，週期重複
@@ -417,9 +457,9 @@ const rain = (() => {
     if (document.hidden) { last = now; return; }
     const t = now / 1000, dt = Math.min(.05, last ? (now - last) / 1000 : 0); last = now;
     slow = dt > .024 ? slow + 1 : Math.max(0, slow - 1);   // 投影筆電跑不動時自動減量
-    if (slow > 20 && S.length > 50 && !col) { S.length = Math.round(S.length * .8); slow = 0; }
+    if (slow > 20 && S.length > 100 && !col) { S.length = Math.round(S.length * .8); slow = 0; }
     const cp = col ? Math.min(1, (t - col.t0) / .6) : 0, ce = cp * cp * cp, boost = 1 + ce * 6;
-    x.fillStyle = 'rgba(2,20,27,.32)'; x.fillRect(0, 0, W, H);   // 半透明覆蓋＝殘影拖尾
+    x.fillStyle = 'rgba(1,10,14,.34)'; x.fillRect(0, 0, W, H);   // 半透明覆蓋＝殘影拖尾
     const cx0 = W / 2, cy0 = H / 2, r0 = 150 * k, r1 = 380 * k;
     S.sort((a, b) => a.L.s - b.L.s);
     let font = '';
@@ -447,11 +487,55 @@ const rain = (() => {
       }
     });
     x.globalAlpha = 1;
+    glowCopy(c, $('#rainGlow'));
     if (col && cp >= 1) { run = false; col.done(); }
   }
   size(); addEventListener('resize', () => { if (run && !col) size(); });
   requestAnimationFrame(frame);
   return { collapse(done) { col = { t0: performance.now() / 1000, done }; }, stop() { run = false; } };
+})();
+/* 「OLXP TOWNHALL · CONTENT」：程式碼解成英文（1 秒）→ 停 3 秒 → 打亂又解回（1 秒）→ 循環 */
+(() => {
+  const el = $('#gate .k'), TXT = el.textContent, POOL = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#$%&*<>/{}=+';
+  const keep = c => c === ' ' || c === '·', t0 = performance.now();
+  const junk = (i, f) => POOL[(i * 7 + f * 13) % POOL.length];
+  function tick(now) {
+    if (!el.isConnected) return;
+    requestAnimationFrame(tick);
+    const t = (now - t0) / 1000, f = Math.floor(t * 20), n = TXT.length;
+    let shown;   // 每個字「已解出」的判斷
+    if (t < 1) shown = i => i < t * n;                          // 由左到右解成英文
+    else {
+      const c = (t - 1) % 4;
+      if (c < 3) shown = () => true;                            // 停在英文
+      else { const p = c - 3; shown = p < .5 ? i => i >= p * 2 * n : i => i < (p - .5) * 2 * n; }   // 前半秒打亂、後半秒解回
+    }
+    el.textContent = [...TXT].map((ch, i) => keep(ch) || shown(i) ? ch : junk(i, f)).join('');
+  }
+  requestAnimationFrame(tick);
+})();
+
+/* 灰塵粒子：極淡、慢速漂浮、隨機閃爍，從開始畫面一路到網頁 */
+(() => {
+  const c = $('#dust'), x = c.getContext('2d'); let W, H, P = [];
+  const size = () => { const d = Math.min(devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight; c.width = W * d; c.height = H * d; x.setTransform(d, 0, 0, d, 0, 0);
+    P = Array.from({ length: Math.round(Math.min(140, W * H / 14000)) }, () => ({ x: Math.random() * W, y: Math.random() * H, r: .4 + Math.random() * 1.4,
+      vx: (Math.random() - .5) * 6, vy: -2 - Math.random() * 6, a: .04 + Math.random() * .18, ph: Math.random() * 6.3, sp: .4 + Math.random() * 1.2 })); };
+  size(); addEventListener('resize', size);
+  let last = 0;
+  (function f(now) {
+    requestAnimationFrame(f); if (document.hidden) { last = now; return; }
+    const dt = Math.min(.05, last ? (now - last) / 1000 : 0), t = now / 1000; last = now;
+    x.clearRect(0, 0, W, H);
+    for (const p of P) {
+      p.x += (p.vx + Math.sin(t * .7 + p.ph) * 4) * dt; p.y += p.vy * dt;
+      if (p.y < -5) { p.y = H + 5; p.x = Math.random() * W; } if (p.x < -5) p.x = W + 5; if (p.x > W + 5) p.x = -5;
+      const a = p.a * (.55 + .45 * Math.sin(t * p.sp + p.ph));
+      const g = x.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 3);
+      g.addColorStop(0, `rgba(220,255,245,${a})`); g.addColorStop(1, 'rgba(220,255,245,0)');
+      x.fillStyle = g; x.beginPath(); x.arc(p.x, p.y, p.r * 3, 0, 7); x.fill();
+    }
+  })(0);
 })();
 let starting = false;
 function start() {   // 先讓文字流吸進中心（0.6 秒），再開片頭
