@@ -410,11 +410,14 @@ const rain = (() => {
     const d = ph * st.wave, e = (ph - n / st.wave - st.hold) * st.wave;
     return { on: i < d && i >= e, edge: Math.abs(i - d) < 1.2 || Math.abs(i - e) < 1.2 };
   }
+  let slow = 0;
   function frame(now) {
-    if (!run) return;
+    if (!run || !c.isConnected) { run = false; return; }   // 畫布離開頁面（定格模式等）就停
     requestAnimationFrame(frame);
     if (document.hidden) { last = now; return; }
     const t = now / 1000, dt = Math.min(.05, last ? (now - last) / 1000 : 0); last = now;
+    slow = dt > .024 ? slow + 1 : Math.max(0, slow - 1);   // 投影筆電跑不動時自動減量
+    if (slow > 20 && S.length > 50 && !col) { S.length = Math.round(S.length * .8); slow = 0; }
     const cp = col ? Math.min(1, (t - col.t0) / .6) : 0, ce = cp * cp * cp, boost = 1 + ce * 6;
     x.fillStyle = 'rgba(2,20,27,.32)'; x.fillRect(0, 0, W, H);   // 半透明覆蓋＝殘影拖尾
     const cx0 = W / 2, cy0 = H / 2, r0 = 150 * k, r1 = 380 * k;
@@ -455,6 +458,7 @@ function start() {   // 先讓文字流吸進中心（0.6 秒），再開片頭
   if (done || tl || starting) return;
   starting = true;
   if (player && player.kind === 'wa') player.ctx.resume();   // 趁使用者這一下點擊解鎖音訊
+  if (player && player.kind === 'el') { const a = player.a; a.muted = true; a.play().then(() => { a.pause(); a.currentTime = 0; }).catch(() => {}); }
   rain.collapse(begin);
 }
 function begin() {
